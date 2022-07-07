@@ -1,12 +1,14 @@
 #![no_std]
 
-use core::fmt::{Formatter};
-use core::marker;
 use core::fmt;
-use embedded_hal::blocking::spi::{Write, Transfer};
+use core::fmt::Formatter;
+use core::marker;
+use embedded_hal::blocking::spi::{Transfer, Write};
 use embedded_hal::digital::v2::OutputPin;
-use cortex_m::asm::delay;
-use vhrdcan::{id::{FrameId, StandardId, ExtendedId}, frame::{Frame, FrameRef}};
+use vhrdcan::{
+    frame::{Frame, FrameRef},
+    id::{ExtendedId, FrameId, StandardId},
+};
 
 /// Shows that register has `read` method.
 pub trait Readable {}
@@ -31,18 +33,18 @@ pub trait Address {
 /// Register field reader.
 pub struct R<U, M> {
     bits: U,
-    _marker: marker::PhantomData<M>
+    _marker: marker::PhantomData<M>,
 }
 
 impl<U, M> R<U, M>
-    where
-        U: Copy
+where
+    U: Copy,
 {
     /// Create new instance of reader
     pub fn new(bits: U) -> Self {
         Self {
             bits,
-            _marker: marker::PhantomData
+            _marker: marker::PhantomData,
         }
     }
     /// Read raw bits from register/bitfield
@@ -51,10 +53,10 @@ impl<U, M> R<U, M>
     }
 }
 
-impl <U, T, FI> PartialEq<FI> for R<U, T>
-    where
-        U: PartialEq,
-        FI: Copy + Into<U>
+impl<U, T, FI> PartialEq<FI> for R<U, T>
+where
+    U: PartialEq,
+    FI: Copy + Into<U>,
 {
     // Needed in register implementations
     fn eq(&self, other: &FI) -> bool {
@@ -64,17 +66,23 @@ impl <U, T, FI> PartialEq<FI> for R<U, T>
 
 impl<FI> R<bool, FI> {
     /// Returns value of the bit.
-    pub fn bit(&self) -> bool { self.bits }
+    pub fn bit(&self) -> bool {
+        self.bits
+    }
     /// Returns `true` if the bit is clear (0).
-    pub fn bit_is_clear(&self) -> bool { !self.bit() }
+    pub fn bit_is_clear(&self) -> bool {
+        !self.bit()
+    }
     /// Returns `true` is the bit is set (1).
-    pub fn bit_is_set(&self) -> bool { self.bit() }
+    pub fn bit_is_set(&self) -> bool {
+        self.bit()
+    }
 }
 
 /// Register writer
 pub struct W<U, M> {
     bits: U,
-    _marker: marker::PhantomData<M>
+    _marker: marker::PhantomData<M>,
 }
 
 impl<U, M> W<U, M> {
@@ -100,57 +108,69 @@ type BfpctrlW = W<u8, BFPCTRL>;
 
 impl ResetValue for BFPCTRL {
     type Type = u8;
-    fn reset_value() -> Self::Type { 0 }
+    fn reset_value() -> Self::Type {
+        0
+    }
 }
 
 impl Address for BFPCTRL {
     type Type = u8;
-    fn address() -> Self::Type { Self::ADDR }
+    fn address() -> Self::Type {
+        Self::ADDR
+    }
 }
 
 pub struct CANSTAT;
 impl Address for CANSTAT {
     type Type = u8;
-    fn address() -> Self::Type { 0b0000_1110 }
+    fn address() -> Self::Type {
+        0b0000_1110
+    }
 }
 
 pub struct CANCTRL;
 impl Address for CANCTRL {
     type Type = u8;
-    fn address() -> Self::Type { 0b0000_1111 }
+    fn address() -> Self::Type {
+        0b0000_1111
+    }
 }
 
 pub struct CNF1;
 impl Address for CNF1 {
     type Type = u8;
-    fn address() -> Self::Type { 0b0010_1010 }
+    fn address() -> Self::Type {
+        0b0010_1010
+    }
 }
 
 pub struct CNF2;
 impl Address for CNF2 {
     type Type = u8;
-    fn address() -> Self::Type { 0b0010_1001 }
+    fn address() -> Self::Type {
+        0b0010_1001
+    }
 }
-
 
 pub struct CNF3;
 impl Address for CNF3 {
     type Type = u8;
-    fn address() -> Self::Type { 0b0010_1000 }
+    fn address() -> Self::Type {
+        0b0010_1000
+    }
 }
-
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum B0fsA {
     High,
-    Low
+    Low,
 }
 
 impl From<B0fsA> for bool {
     fn from(variant: B0fsA) -> Self {
         match variant {
             B0fsA::High => true,
-            B0fsA::Low => false
+            B0fsA::Low => false,
         }
     }
 }
@@ -160,7 +180,7 @@ impl B0fsR {
     pub fn variant(&self) -> B0fsA {
         match self.bits {
             true => B0fsA::High,
-            false => B0fsA::Low
+            false => B0fsA::Low,
         }
     }
     pub fn is_high(&self) -> bool {
@@ -172,7 +192,7 @@ impl B0fsR {
 }
 
 pub struct B0fsW<'a> {
-    w: &'a mut BfpctrlW
+    w: &'a mut BfpctrlW,
 }
 
 impl<'a> B0fsW<'a> {
@@ -199,14 +219,14 @@ impl<'a> B0fsW<'a> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum B0feA {
     Enabled,
-    HighImpedance
+    HighImpedance,
 }
 
 impl From<B0feA> for bool {
     fn from(variant: B0feA) -> Self {
         match variant {
             B0feA::Enabled => true,
-            B0feA::HighImpedance => false
+            B0feA::HighImpedance => false,
         }
     }
 }
@@ -216,7 +236,7 @@ impl B0feR {
     pub fn variant(&self) -> B0feA {
         match self.bits {
             true => B0feA::Enabled,
-            false => B0feA::HighImpedance
+            false => B0feA::HighImpedance,
         }
     }
     pub fn is_high(&self) -> bool {
@@ -228,7 +248,7 @@ impl B0feR {
 }
 
 pub struct B0feW<'a> {
-    w: &'a mut BfpctrlW
+    w: &'a mut BfpctrlW,
 }
 
 impl<'a> B0feW<'a> {
@@ -253,14 +273,14 @@ impl<'a> B0feW<'a> {
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum B0fmA {
     Interrupt,
-    Output
+    Output,
 }
 
 impl From<B0fmA> for bool {
     fn from(variant: B0fmA) -> Self {
         match variant {
             B0fmA::Interrupt => true,
-            B0fmA::Output => false
+            B0fmA::Output => false,
         }
     }
 }
@@ -270,7 +290,7 @@ impl B0fmR {
     pub fn variant(&self) -> B0fmA {
         match self.bits {
             true => B0fmA::Interrupt,
-            false => B0fmA::Output
+            false => B0fmA::Output,
         }
     }
     pub fn is_high(&self) -> bool {
@@ -282,7 +302,7 @@ impl B0fmR {
 }
 
 pub struct B0fmW<'a> {
-    w: &'a mut BfpctrlW
+    w: &'a mut BfpctrlW,
 }
 
 impl<'a> B0fmW<'a> {
@@ -307,28 +327,28 @@ impl<'a> B0fmW<'a> {
 ///
 
 impl BfpctrlR {
-    pub fn b0fs(&self) -> B0fsR { B0fsR::new(((self.bits >> 5) & 0x01) != 0) }
-    pub fn b0fe(&self) -> B0feR { B0feR::new(((self.bits >> 3) & 0x01) != 0) }
-    pub fn b0fm(&self) -> B0feR { B0feR::new(((self.bits >> 0) & 0x01) != 0) }
+    pub fn b0fs(&self) -> B0fsR {
+        B0fsR::new(((self.bits >> 5) & 0x01) != 0)
+    }
+    pub fn b0fe(&self) -> B0feR {
+        B0feR::new(((self.bits >> 3) & 0x01) != 0)
+    }
+    pub fn b0fm(&self) -> B0feR {
+        B0feR::new(((self.bits >> 0) & 0x01) != 0)
+    }
 }
 
 impl BfpctrlW {
     pub fn b0fs(&mut self) -> B0fsW {
-        B0fsW {
-            w: self
-        }
+        B0fsW { w: self }
     }
 
     pub fn b0fe(&mut self) -> B0feW {
-        B0feW {
-            w: self
-        }
+        B0feW { w: self }
     }
 
     pub fn b0fm(&mut self) -> B0fmW {
-        B0fmW {
-            w: self
-        }
+        B0fmW { w: self }
     }
 }
 
@@ -349,37 +369,32 @@ impl<E> From<E> for Error<E> {
 pub struct Mcp25625Ral<SPI, CS> {
     spi: SPI,
     cs: CS,
-    one_cp: u32 // number of cpu cycles per one sck period
 }
 
 pub enum McpFastRxRead {
     RXB0SIDH = 0b00,
     RXB0D0 = 0b01,
     RXB1SIDH = 0b10,
-    RXB1D0 = 0b11
+    RXB1D0 = 0b11,
 }
 
 impl<E, SPI, CS> Mcp25625Ral<SPI, CS>
-    where
-        SPI: Transfer<u8, Error = E> + Write<u8, Error = E>,
-        CS: OutputPin
+where
+    SPI: Transfer<u8, Error = E> + Write<u8, Error = E>,
+    CS: OutputPin,
 {
-    const RESET_CMD:       u8 = 0b1100_0000;
-    const READ_CMD:        u8 = 0b0000_0011;
+    const RESET_CMD: u8 = 0b1100_0000;
+    const READ_CMD: u8 = 0b0000_0011;
     const READ_RX_BUF_CMD: u8 = 0b1001_0000; // 1001_0nm0
-    const WRITE_CMD:       u8 = 0b0000_0010;
+    const WRITE_CMD: u8 = 0b0000_0010;
     //const LOAD_TX_CMD:     u8 = 0b0100_0000; // 0100_0abc
-    const RTS_CMD:         u8 = 0b1000_0000; // 1000_0nnn
-    //const READ_STATUS_CMD: u8 = 0b1010_0000;
-    //const RX_STATUS:       u8 = 0b1011_0000;
-    const BIT_MODIFY_CMD:  u8 = 0b0000_0101;
+    const RTS_CMD: u8 = 0b1000_0000; // 1000_0nnn
+                                     //const READ_STATUS_CMD: u8 = 0b1010_0000;
+                                     //const RX_STATUS:       u8 = 0b1011_0000;
+    const BIT_MODIFY_CMD: u8 = 0b0000_0101;
 
-    pub fn new(spi: SPI, cs: CS, one_cp: u32) -> Self {
-        Mcp25625Ral {
-            spi,
-            cs,
-            one_cp
-        }
+    pub fn new(spi: SPI, cs: CS) -> Self {
+        Mcp25625Ral { spi, cs }
     }
 
     pub fn release(self) -> (SPI, CS) {
@@ -389,17 +404,13 @@ impl<E, SPI, CS> Mcp25625Ral<SPI, CS>
     pub fn write_reg(&mut self, addr: u8, byte: u8) {
         self.cs.set_low().ok();
         let _ = self.spi.write(&[Self::WRITE_CMD, addr, byte]);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
     }
 
     pub fn bit_modify(&mut self, addr: u8, mask: u8, bits: u8) {
         self.cs.set_low().ok();
         let _ = self.spi.write(&[Self::BIT_MODIFY_CMD, addr, mask, bits]);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
     }
 
     fn write_many2(&mut self, addr: u8, d0: &[u8], d1: &[u8]) {
@@ -407,17 +418,13 @@ impl<E, SPI, CS> Mcp25625Ral<SPI, CS>
         let _ = self.spi.write(&[Self::WRITE_CMD, addr]);
         let _ = self.spi.write(d0);
         let _ = self.spi.write(d1);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
     }
 
     pub fn write_raw(&mut self, bytes: &[u8]) {
         self.cs.set_low().ok();
         let _ = self.spi.write(bytes);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
     }
 
     pub fn read_reg(&mut self, addr: u8) -> u8 {
@@ -425,36 +432,41 @@ impl<E, SPI, CS> Mcp25625Ral<SPI, CS>
         let _ = self.spi.write(&[Self::READ_CMD, addr]);
         let mut buf = [0u8; 1];
         let r = self.spi.transfer(&mut buf);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
         r.unwrap_or(&[0u8])[0]
     }
 
     // Reads from 0x61/0x66 or 0x71/0x76 for buffers 0/1
     pub fn read_rxbuf(&mut self, addr: McpFastRxRead, buf: &mut [u8]) {
         self.cs.set_low().ok();
-        let _ = self.spi.write(&[Self::READ_RX_BUF_CMD | ((addr as u8) << 1)]);
+        let _ = self
+            .spi
+            .write(&[Self::READ_RX_BUF_CMD | ((addr as u8) << 1)]);
         let _ = self.spi.transfer(buf);
-        delay(self.one_cp);
         self.cs.set_high().ok();
-        delay(self.one_cp * 3);
     }
 
     pub fn read<REG>(&mut self) -> R<u8, REG>
-        where
-            REG: Address<Type=u8>
+    where
+        REG: Address<Type = u8>,
     {
         let bits = self.read_reg(REG::address());
-        R { bits, _marker: marker::PhantomData }
+        R {
+            bits,
+            _marker: marker::PhantomData,
+        }
     }
 
     pub fn write<REG, F>(&mut self, f: F)
-        where
-            F: FnOnce(&mut W<u8, REG>) -> &mut W<u8, REG>,
-            REG: ResetValue<Type=u8> + Address<Type=u8>
+    where
+        F: FnOnce(&mut W<u8, REG>) -> &mut W<u8, REG>,
+        REG: ResetValue<Type = u8> + Address<Type = u8>,
     {
-        let bits = f(&mut W{ bits: REG::reset_value(), _marker: marker::PhantomData }).bits;
+        let bits = f(&mut W {
+            bits: REG::reset_value(),
+            _marker: marker::PhantomData,
+        })
+        .bits;
         self.write_reg(REG::address(), bits);
     }
     //
@@ -512,7 +524,7 @@ pub struct MCP25625Config {
     /// Enable filters or receive everything
     pub filters_config: FiltersConfig,
     /// Switch to this mode after configuration
-    pub operation_mode: McpOperationMode
+    pub operation_mode: McpOperationMode,
 }
 
 #[derive(Debug)]
@@ -527,7 +539,7 @@ pub enum McpErrorKind {
     RegVerifyError(u8),
     NoTxSlotsAvailable,
     TooBig,
-    SpiIsBroken
+    SpiIsBroken,
 }
 
 /// Convert enum to bits
@@ -542,9 +554,8 @@ pub enum McpOperationMode {
     Loopback,
     ListenOnly,
     Configuration,
-    Wrong
+    Wrong,
 }
-
 
 impl Bits for McpOperationMode {
     fn bits(&self) -> u8 {
@@ -554,7 +565,7 @@ impl Bits for McpOperationMode {
             McpOperationMode::Loopback => 0b010,
             McpOperationMode::ListenOnly => 0b011,
             McpOperationMode::Configuration => 0b100,
-            _ => 0b000
+            _ => 0b000,
         }
     }
 }
@@ -567,7 +578,7 @@ pub enum McpStatInterruptFlags {
     TXB1Interrupt,
     TXB2Interrupt,
     RXB0Interrupt,
-    RXB1Interrupt
+    RXB1Interrupt,
 }
 
 pub struct McpErrorFlags {
@@ -575,16 +586,36 @@ pub struct McpErrorFlags {
 }
 
 impl McpErrorFlags {
-    pub fn rx1ovr_is_set(&self) -> bool { self.bits & (1u8 << 7) != 0 }
-    pub fn rx0ovr_is_set(&self) -> bool { self.bits & (1u8 << 6) != 0 }
-    pub fn txbo_is_set(&self) -> bool { self.bits & (1u8 << 5) != 0 }
-    pub fn txep_is_set(&self) -> bool { self.bits & (1u8 << 4) != 0 }
-    pub fn rxep_is_set(&self) -> bool { self.bits & (1u8 << 3) != 0 }
-    pub fn txwar_is_set(&self) -> bool { self.bits & (1u8 << 2) != 0 }
-    pub fn rxwar_is_set(&self) -> bool { self.bits & (1u8 << 1) != 0 }
-    pub fn ewarn_is_set(&self) -> bool { self.bits & (1u8 << 0) != 0 }
-    pub fn is_err(&self) -> bool { self.bits != 0 }
-    pub fn is_ok(&self) -> bool { self.bits == 0 }
+    pub fn rx1ovr_is_set(&self) -> bool {
+        self.bits & (1u8 << 7) != 0
+    }
+    pub fn rx0ovr_is_set(&self) -> bool {
+        self.bits & (1u8 << 6) != 0
+    }
+    pub fn txbo_is_set(&self) -> bool {
+        self.bits & (1u8 << 5) != 0
+    }
+    pub fn txep_is_set(&self) -> bool {
+        self.bits & (1u8 << 4) != 0
+    }
+    pub fn rxep_is_set(&self) -> bool {
+        self.bits & (1u8 << 3) != 0
+    }
+    pub fn txwar_is_set(&self) -> bool {
+        self.bits & (1u8 << 2) != 0
+    }
+    pub fn rxwar_is_set(&self) -> bool {
+        self.bits & (1u8 << 1) != 0
+    }
+    pub fn ewarn_is_set(&self) -> bool {
+        self.bits & (1u8 << 0) != 0
+    }
+    pub fn is_err(&self) -> bool {
+        self.bits != 0
+    }
+    pub fn is_ok(&self) -> bool {
+        self.bits == 0
+    }
 }
 
 impl fmt::Debug for McpErrorFlags {
@@ -623,14 +654,30 @@ pub struct McpInterruptFlags {
 }
 
 impl McpInterruptFlags {
-    pub fn merrf_is_set(&self) -> bool { self.bits & (1u8 << 7) != 0 }
-    pub fn wakif_is_set(&self) -> bool { self.bits & (1u8 << 6) != 0 }
-    pub fn errif_is_set(&self) -> bool { self.bits & (1u8 << 5) != 0 }
-    pub fn tx2if_is_set(&self) -> bool { self.bits & (1u8 << 4) != 0 }
-    pub fn tx1if_is_set(&self) -> bool { self.bits & (1u8 << 3) != 0 }
-    pub fn tx0if_is_set(&self) -> bool { self.bits & (1u8 << 2) != 0 }
-    pub fn rx1if_is_set(&self) -> bool { self.bits & (1u8 << 1) != 0 }
-    pub fn rx0if_is_set(&self) -> bool { self.bits & (1u8 << 0) != 0 }
+    pub fn merrf_is_set(&self) -> bool {
+        self.bits & (1u8 << 7) != 0
+    }
+    pub fn wakif_is_set(&self) -> bool {
+        self.bits & (1u8 << 6) != 0
+    }
+    pub fn errif_is_set(&self) -> bool {
+        self.bits & (1u8 << 5) != 0
+    }
+    pub fn tx2if_is_set(&self) -> bool {
+        self.bits & (1u8 << 4) != 0
+    }
+    pub fn tx1if_is_set(&self) -> bool {
+        self.bits & (1u8 << 3) != 0
+    }
+    pub fn tx0if_is_set(&self) -> bool {
+        self.bits & (1u8 << 2) != 0
+    }
+    pub fn rx1if_is_set(&self) -> bool {
+        self.bits & (1u8 << 1) != 0
+    }
+    pub fn rx0if_is_set(&self) -> bool {
+        self.bits & (1u8 << 0) != 0
+    }
 }
 
 impl fmt::Debug for McpInterruptFlags {
@@ -667,14 +714,14 @@ impl fmt::Debug for McpInterruptFlags {
 struct McpTxBuf {
     // pub txb_ctrl: u8,
     pub txb_sidh: u8,
-    pub rts_cmd: u8
+    pub rts_cmd: u8,
 }
 
 pub enum McpPriority {
     Low = 0,
     LowIntermediate = 1,
     HighIntermediate = 2,
-    Highest = 3
+    Highest = 3,
 }
 
 pub enum McpAcceptanceFilter {
@@ -683,20 +730,20 @@ pub enum McpAcceptanceFilter {
     RXF2 = 2,
     RXF3 = 3,
     RXF4 = 4,
-    RXF5 = 5
+    RXF5 = 5,
 }
 
 #[derive(Copy, Clone)]
 pub enum McpReceiveBuffer {
     Buffer0,
-    Buffer1
+    Buffer1,
 }
 
 pub struct McpCanMessage {
     pub len: u8,
     pub data: [u8; 8],
     pub address: FrameId,
-    pub filter: McpAcceptanceFilter
+    pub filter: McpAcceptanceFilter,
 }
 
 enum Filter {
@@ -710,7 +757,7 @@ enum Filter {
 
 enum FilterMask {
     FilterMaskBuffer0,
-    FilterMaskBuffer1
+    FilterMaskBuffer1,
 }
 
 impl fmt::Debug for McpCanMessage {
@@ -727,7 +774,7 @@ impl fmt::Debug for McpCanMessage {
 pub struct FiltersConfigBuffer0 {
     pub mask: FiltersMask,
     pub filter0: FrameId,
-    pub filter1: Option<FrameId>
+    pub filter1: Option<FrameId>,
 }
 
 #[derive(Eq, PartialEq)]
@@ -742,7 +789,7 @@ pub struct FiltersConfigBuffer1 {
 #[derive(Eq, PartialEq)]
 pub enum FiltersConfig {
     ReceiveAll,
-    Filter(FiltersConfigBuffer0, Option<FiltersConfigBuffer1>)
+    Filter(FiltersConfigBuffer0, Option<FiltersConfigBuffer1>),
 }
 
 #[derive(Eq, PartialEq)]
@@ -754,7 +801,7 @@ pub enum FiltersMask {
     /// All 11 bits + 2 specified data bytes are checked by filters (EID17 and EID16 is ignored).
     StandardIdBitsAndDataBytes01(u8, u8),
     /// ID10 ID0 EID17 EID0 or ID10 ID0 . . EID15:EID8=byte0, EID7:EID0=byte1.
-    Custom(u32)
+    Custom(u32),
 }
 
 impl FiltersMask {
@@ -764,16 +811,18 @@ impl FiltersMask {
             AllExtendedIdBits => vhrdcan::EXTENDED_ID_ALL_BITS,
             OnlyStandardIdBits => (vhrdcan::STANDARD_ID_ALL_BITS as u32) << 18,
             StandardIdBitsAndDataBytes01(byte0, byte1) => {
-                (vhrdcan::STANDARD_ID_ALL_BITS as u32) << 18 | (*byte0 as u32) << 8 | (*byte1 as u32)
-            },
-            Custom(mask) => *mask
+                (vhrdcan::STANDARD_ID_ALL_BITS as u32) << 18
+                    | (*byte0 as u32) << 8
+                    | (*byte1 as u32)
+            }
+            Custom(mask) => *mask,
         }
     }
 }
 
 pub enum TxBufferChoice {
     Any,
-    OnlyOne(u8)
+    OnlyOne(u8),
 }
 
 pub enum ClkOutMode {
@@ -781,7 +830,7 @@ pub enum ClkOutMode {
     SystemClock = 0,
     SystemClockDiv2 = 1,
     SystemClockDiv4 = 2,
-    SystemClockDiv8 = 3
+    SystemClockDiv8 = 3,
 }
 
 pub const TXB0CTRL: u8 = 0b0011_0000;
@@ -789,16 +838,13 @@ pub const TXB1CTRL: u8 = 0b0011_0000 + 16;
 pub const TXB2CTRL: u8 = 0b0011_0000 + 32;
 
 impl<E, SPI, CS> MCP25625<SPI, CS>
-    where
-        SPI: Transfer<u8, Error = E> + Write<u8, Error = E>,
-        CS: OutputPin
+where
+    SPI: Transfer<u8, Error = E> + Write<u8, Error = E>,
+    CS: OutputPin,
 {
-    pub fn new(spi: SPI, cs: CS, spi_frequency_hz: u32, core_frequency_hz: u32) -> Self {
-        let one_cp = core_frequency_hz / spi_frequency_hz;
-        let ral = Mcp25625Ral::new(spi, cs, one_cp);
-        Self {
-            ral
-        }
+    pub fn new(spi: SPI, cs: CS) -> Self {
+        let ral = Mcp25625Ral::new(spi, cs);
+        Self { ral }
     }
 
     pub fn release(self) -> (SPI, CS) {
@@ -815,7 +861,7 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
             0b010 => McpOperationMode::Loopback,
             0b011 => McpOperationMode::ListenOnly,
             0b100 => McpOperationMode::Configuration,
-            _ => McpOperationMode::Wrong
+            _ => McpOperationMode::Wrong,
         };
         let i_flags = match bits3_1 {
             0b000 => McpStatInterruptFlags::NoInterrupt,
@@ -826,7 +872,7 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
             0b101 => McpStatInterruptFlags::TXB2Interrupt,
             0b110 => McpStatInterruptFlags::RXB0Interrupt,
             0b111 => McpStatInterruptFlags::RXB1Interrupt,
-            _ => unreachable!()
+            _ => unreachable!(),
         };
         (op_mode, i_flags)
     }
@@ -834,8 +880,10 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
     pub fn change_mode(&mut self, to: McpOperationMode) -> Result<(), McpErrorKind> {
         if self.stat().0 != to {
             // self.ral.write_reg(CANCTRL::address(), to.bits() << 5); // request new mode
-            self.ral.bit_modify(CANCTRL::address(), 0b1110_0000, to.bits() << 5);
-            if self.stat().0 != to { // check
+            self.ral
+                .bit_modify(CANCTRL::address(), 0b1110_0000, to.bits() << 5);
+            if self.stat().0 != to {
+                // check
                 return Err(McpErrorKind::ConfigRequestFailed);
             }
             Ok(())
@@ -846,7 +894,8 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
 
     pub fn apply_config(&mut self, config: MCP25625Config) -> Result<(), McpErrorKind> {
         self.ral.write_raw(&[Mcp25625Ral::<SPI, CS>::RESET_CMD]);
-        self.write_reg_verify(0b0011_0110, 0b1010_0101).map_err(|_| McpErrorKind::SpiIsBroken)?;
+        self.write_reg_verify(0b0011_0110, 0b1010_0101)
+            .map_err(|_| McpErrorKind::SpiIsBroken)?;
 
         let sync_seg = 1u8;
         let tq_per_bit = sync_seg + config.prop_seg + config.ph_seg1 + config.ph_seg2;
@@ -872,8 +921,8 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
             return Err(McpErrorKind::WrongSJW);
         }
         self.change_mode(McpOperationMode::Configuration)?;
-        let cnf1: u8 = ((config.sync_jump_width-1) << 6) | config.brp;
-        let cnf2: u8 = (1 << 7) | (1 << 6) | ((config.ph_seg1-1) << 3) | (config.prop_seg-1);
+        let cnf1: u8 = ((config.sync_jump_width - 1) << 6) | config.brp;
+        let cnf2: u8 = (1 << 7) | (1 << 6) | ((config.ph_seg1 - 1) << 3) | (config.prop_seg - 1);
         let cnf3: u8 = config.ph_seg2 - 1;
         self.write_reg_verify(CNF1::address(), cnf1)?;
         self.write_reg_verify(CNF2::address(), cnf2)?;
@@ -883,7 +932,7 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
         match config.filters_config {
             FiltersConfig::ReceiveAll => {
                 self.rx_configure(config.rollover_to_buffer1, true)?;
-            },
+            }
             FiltersConfig::Filter(filters0, filters1) => {
                 self.rx_configure(config.rollover_to_buffer1, false)?;
                 self.configure_filters(filters0, filters1);
@@ -899,13 +948,18 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
                 self.ral.bit_modify(CANCTRL::address(), 0b0000_0100, 0);
             }
             _ => {
-                self.ral.bit_modify(CANCTRL::address(), 0b0000_0111, 0b0000_0100 | clkout_mode as u8);
+                self.ral.bit_modify(
+                    CANCTRL::address(),
+                    0b0000_0111,
+                    0b0000_0100 | clkout_mode as u8,
+                );
             }
         }
     }
 
     pub fn one_shot_mode(&mut self, is_enabled: bool) {
-        self.ral.bit_modify(CANCTRL::address(), 0b0000_1000, (is_enabled as u8) << 3);
+        self.ral
+            .bit_modify(CANCTRL::address(), 0b0000_1000, (is_enabled as u8) << 3);
     }
 
     // pub fn masks_rxall(&mut self) -> Result<(), McpErrorKind> {
@@ -985,19 +1039,18 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
         }
     }
 
-    fn find_empty_txbuf(&mut self, buffer_choice: TxBufferChoice) -> Result<McpTxBuf, McpErrorKind> {
+    fn find_empty_txbuf(
+        &mut self,
+        buffer_choice: TxBufferChoice,
+    ) -> Result<McpTxBuf, McpErrorKind> {
         let txb_n_ctrl: &[u8] = match buffer_choice {
-            TxBufferChoice::Any => {
-                &[TXB0CTRL, TXB1CTRL, TXB2CTRL]
+            TxBufferChoice::Any => &[TXB0CTRL, TXB1CTRL, TXB2CTRL],
+            TxBufferChoice::OnlyOne(buffer_idx) => match buffer_idx {
+                0 => &[TXB0CTRL],
+                1 => &[TXB1CTRL],
+                2 => &[TXB2CTRL],
+                _ => return Err(McpErrorKind::NoTxSlotsAvailable),
             },
-            TxBufferChoice::OnlyOne(buffer_idx) => {
-                match buffer_idx {
-                    0 => { &[TXB0CTRL] }
-                    1 => { &[TXB1CTRL] }
-                    2 => { &[TXB2CTRL] }
-                    _ => { return Err(McpErrorKind::NoTxSlotsAvailable) }
-                }
-            }
         };
         // let txb_n_ctrl: [u8; 3] = [0b0011_0000, 0b0011_0000 + 16, 0b0011_0000 + 32];
         let mut buf_idx = 666;
@@ -1006,28 +1059,32 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
             if txb_ctrl & (1 << 3) == 0 {
                 buf_idx = match buffer_choice {
                     TxBufferChoice::Any => i,
-                    TxBufferChoice::OnlyOne(preferred) => preferred as usize
+                    TxBufferChoice::OnlyOne(preferred) => preferred as usize,
                 };
                 break;
             }
         }
         if buf_idx <= 2 {
-            Ok(McpTxBuf{
+            Ok(McpTxBuf {
                 // txb_ctrl: txb_n_ctrl[buf_idx],
                 txb_sidh: txb_n_ctrl[buf_idx] + 1,
-                rts_cmd: Mcp25625Ral::<SPI, CS>::RTS_CMD | (1u8 << buf_idx as u8)
-                //txb_sidl: 0x32 + buf_idx as u8 * 0x10,
-                //txb_eid8: 0x33 + buf_idx as u8 * 0x10,
-                //txb_eid0: 0x34 + buf_idx as u8 * 0x10,
-                //txb_dlc:  0x35 + buf_idx as u8 * 0x10,
-                //txb_data: 0x36 + buf_idx as u8 * 0x10
+                rts_cmd: Mcp25625Ral::<SPI, CS>::RTS_CMD | (1u8 << buf_idx as u8), //txb_sidl: 0x32 + buf_idx as u8 * 0x10,
+                                                                                   //txb_eid8: 0x33 + buf_idx as u8 * 0x10,
+                                                                                   //txb_eid0: 0x34 + buf_idx as u8 * 0x10,
+                                                                                   //txb_dlc:  0x35 + buf_idx as u8 * 0x10,
+                                                                                   //txb_data: 0x36 + buf_idx as u8 * 0x10
             })
         } else {
             Err(McpErrorKind::NoTxSlotsAvailable)
         }
     }
 
-    pub fn send(&mut self, frame: FrameRef, buffer_choice: TxBufferChoice, _: McpPriority) -> Result<(), McpErrorKind> {
+    pub fn send(
+        &mut self,
+        frame: FrameRef,
+        buffer_choice: TxBufferChoice,
+        _: McpPriority,
+    ) -> Result<(), McpErrorKind> {
         if frame.data.len() > 8 {
             return Err(McpErrorKind::TooBig);
         }
@@ -1045,7 +1102,7 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
     pub fn receive(&mut self, buffer: McpReceiveBuffer) -> Frame<8> {
         let block_start_addr = match buffer {
             McpReceiveBuffer::Buffer0 => McpFastRxRead::RXB0SIDH, // sidh addr
-            McpReceiveBuffer::Buffer1 => McpFastRxRead::RXB1SIDH
+            McpReceiveBuffer::Buffer1 => McpFastRxRead::RXB1SIDH,
         };
         let mut buf = [0u8; 13];
         self.ral.read_rxbuf(block_start_addr, &mut buf);
@@ -1057,10 +1114,16 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
 
         let is_extended = sidl & (1 << 3) != 0;
         let frame_id = if is_extended {
-            let address = ((sidh as u32) << 21) | ((sidl as u32 & 0xE0) << 13) | (((sidl & 0b11) as u32) << 16) | ((eid8 as u32) << 8) | eid0 as u32;
+            let address = ((sidh as u32) << 21)
+                | ((sidl as u32 & 0xE0) << 13)
+                | (((sidl & 0b11) as u32) << 16)
+                | ((eid8 as u32) << 8)
+                | eid0 as u32;
             FrameId::Extended(unsafe { ExtendedId::new_unchecked(address) })
         } else {
-            FrameId::Standard(unsafe { StandardId::new_unchecked(((sidh as u16) << 3) | ((sidl >> 5) as u16)) })
+            FrameId::Standard(unsafe {
+                StandardId::new_unchecked(((sidh as u16) << 3) | ((sidl >> 5) as u16))
+            })
         };
 
         let mut data = [0u8; 8];
@@ -1069,17 +1132,19 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
         if data_len > 8 {
             data_len = 8;
         }
-        unsafe {
-            Frame::new_move_unchecked(frame_id, data, data_len as u16)
-        }
+        unsafe { Frame::new_move_unchecked(frame_id, data, data_len as u16) }
     }
 
-    fn configure_filters(&mut self, filters0: FiltersConfigBuffer0, filters1: Option<FiltersConfigBuffer1>) {
+    fn configure_filters(
+        &mut self,
+        filters0: FiltersConfigBuffer0,
+        filters1: Option<FiltersConfigBuffer1>,
+    ) {
         self.mask(FilterMask::FilterMaskBuffer0, filters0.mask.mask_bits());
         self.filter(Filter::Filter0, filters0.filter0);
         let buffer0filter1 = match filters0.filter1 {
             Some(filter1) => filter1,
-            None => filters0.filter0
+            None => filters0.filter0,
         };
         self.filter(Filter::Filter1, buffer0filter1);
         match filters1 {
@@ -1088,13 +1153,13 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
                 self.filter(Filter::Filter2, filters1.filter2);
                 let buffer1filter3 = match filters1.filter3 {
                     Some(filter3) => filter3,
-                    None => filters1.filter2
+                    None => filters1.filter2,
                 };
                 self.filter(Filter::Filter3, buffer1filter3);
                 match filters1.filter4 {
                     Some(filter4) => {
                         self.filter(Filter::Filter4, filter4);
-                    },
+                    }
                     None => {
                         self.filter(Filter::Filter4, buffer1filter3);
                     }
@@ -1102,12 +1167,12 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
                 match filters1.filter5 {
                     Some(filter5) => {
                         self.filter(Filter::Filter5, filter5);
-                    },
+                    }
                     None => {
                         self.filter(Filter::Filter5, buffer1filter3);
                     }
                 }
-            },
+            }
             None => {
                 self.mask(FilterMask::FilterMaskBuffer1, filters0.mask.mask_bits());
                 self.filter(Filter::Filter2, filters0.filter0);
@@ -1122,41 +1187,31 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
         let (sidh, sidl, eid8, eid0) = calculate_id_regs(id);
         use Filter::*;
         let base_address = match filter {
-            Filter0 | Filter1 | Filter2 => {
-                0x00 + (filter as u8) * 4
-            },
-            Filter3 | Filter4 | Filter5 => {
-                0x10 + (filter as u8 - 3) * 4
-            }
+            Filter0 | Filter1 | Filter2 => 0x00 + (filter as u8) * 4,
+            Filter3 | Filter4 | Filter5 => 0x10 + (filter as u8 - 3) * 4,
         };
-        self.ral.write_many2(base_address, &[sidh, sidl, eid8, eid0], &[]);
+        self.ral
+            .write_many2(base_address, &[sidh, sidl, eid8, eid0], &[]);
     }
 
     fn mask(&mut self, mask_for: FilterMask, mask: u32) {
         let (sidh, sidl, eid8, eid0) = calculate_mask_regs(mask);
         let base_address = match mask_for {
-            FilterMask::FilterMaskBuffer0 => {
-                0x20
-            },
-            FilterMask::FilterMaskBuffer1 => {
-                0x24
-            }
+            FilterMask::FilterMaskBuffer0 => 0x20,
+            FilterMask::FilterMaskBuffer1 => 0x24,
         };
-        self.ral.write_many2(base_address, &[sidh, sidl, eid8, eid0], &[]);
+        self.ral
+            .write_many2(base_address, &[sidh, sidl, eid8, eid0], &[]);
     }
 
     pub fn led_on(&mut self) {
-        self.ral.write::<BFPCTRL, _>(|w| w
-            .b0fm().output()
-            .b0fs().high()
-            .b0fe().enable() );
+        self.ral
+            .write::<BFPCTRL, _>(|w| w.b0fm().output().b0fs().high().b0fe().enable());
     }
 
     pub fn led_off(&mut self) {
-        self.ral.write::<BFPCTRL, _>(|w| w
-            .b0fm().output()
-            .b0fs().low()
-            .b0fe().enable() );
+        self.ral
+            .write::<BFPCTRL, _>(|w| w.b0fm().output().b0fs().low().b0fe().enable());
     }
 }
 
@@ -1166,18 +1221,26 @@ fn calculate_mask_regs(mask: u32) -> (u8, u8, u8, u8) {
         (mask >> 21) as u8,
         (((mask >> 13) & 0xE0) as u8) | (((mask >> 16) & 0b11) as u8),
         ((mask >> 8) & 0xFF) as u8,
-        (mask & 0xFF) as u8
+        (mask & 0xFF) as u8,
     )
 }
 // SIDH, SIDL (EXIDE depends on FrameId), EID8, EID0
 fn calculate_id_regs(id: FrameId) -> (u8, u8, u8, u8) {
     match id {
-        FrameId::Standard(sid) => {
-            ((sid.inner() >> 3) as u8, ((sid.inner() as u8 & 0b111) << 5), 0u8, 0u8)
-        },
+        FrameId::Standard(sid) => (
+            (sid.inner() >> 3) as u8,
+            ((sid.inner() as u8 & 0b111) << 5),
+            0u8,
+            0u8,
+        ),
         FrameId::Extended(eid) => {
             let mask_regs = calculate_mask_regs(eid.inner());
-            (mask_regs.0, mask_regs.1 | (1 << 3), mask_regs.2, mask_regs.3)
+            (
+                mask_regs.0,
+                mask_regs.1 | (1 << 3),
+                mask_regs.2,
+                mask_regs.3,
+            )
         }
     }
 }
