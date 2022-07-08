@@ -871,13 +871,18 @@ impl<E, SPI, CS> MCP25625<SPI, CS>
         if !(config.sync_jump_width <= config.ph_seg1 && config.sync_jump_width <= config.ph_seg2) {
             return Err(McpErrorKind::WrongSJW);
         }
+        
+        let MCP_16MHZ_250K_BPS_CFG1: u8 = 0x41;
+        let MCP_16MHZ_250K_BPS_CFG2: u8 = 0xF1;
+        let MCP_16MHZ_250K_BPS_CFG3: u8 = 0x85;
+
         self.change_mode(McpOperationMode::Configuration)?;
-        let cnf1: u8 = ((config.sync_jump_width-1) << 6) | config.brp;
-        let cnf2: u8 = (1 << 7) | (1 << 6) | ((config.ph_seg1-1) << 3) | (config.prop_seg-1);
+        let cnf1: u8 = ((config.sync_jump_width - 1) << 6) | config.brp;
+        let cnf2: u8 = (1 << 7) | (1 << 6) | ((config.ph_seg1 - 1) << 3) | (config.prop_seg - 1);
         let cnf3: u8 = config.ph_seg2 - 1;
-        self.write_reg_verify(CNF1::address(), cnf1)?;
-        self.write_reg_verify(CNF2::address(), cnf2)?;
-        self.write_reg_verify(CNF3::address(), cnf3)?;
+        self.write_reg_verify(CNF1::address(), MCP_16MHZ_250K_BPS_CFG1)?;
+        self.write_reg_verify(CNF2::address(), MCP_16MHZ_250K_BPS_CFG2)?;
+        self.write_reg_verify(CNF3::address(), MCP_16MHZ_250K_BPS_CFG3)?;
         self.reset_error_flags();
         self.reset_interrupt_flags(0);
         match config.filters_config {
